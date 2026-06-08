@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Red Harvest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #c0392b;
+      --red-dark: #922b21;
+      --red-deep: #641e16;
+      --red-light: #e74c3c;
+      --cream: #fdf6ec;
+      --warm: #f5e6d3;
+      --tan: #d4a574;
+      --bark: #8b5e3c;
+      --charcoal: #2c2c2c;
+      --ink: #1a1a1a;
+      --muted: #7a6a5a;
+      --border: rgba(139,94,60,0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ─── AUTH SCREEN ─── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--red-deep);
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(192,57,43,0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(146,43,33,0.3) 0%, transparent 50%);
+      padding: 2rem;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .auth-logo .wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .auth-logo .tagline {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--tan);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+    }
+
+    .auth-card {
+      background: var(--cream);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      background: white;
+      color: var(--ink);
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--red);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .auth-error {
+      font-size: 0.8rem;
+      color: var(--red);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    /* ─── MAIN APP ─── */
+    #app { display: none; min-height: 100vh; }
+
+    /* Header */
+    .app-header {
+      background: var(--red-deep);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .header-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+    }
+
+    .header-brand span {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--tan);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 1px;
+    }
+
+    .btn-signout {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--cream);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-signout:hover { background: rgba(255,255,255,0.2); }
+
+    /* Nav tabs */
+    .app-nav {
+      display: flex;
+      background: white;
+      border-bottom: 1.5px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-tab {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.9rem 0.5rem;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .nav-tab .nav-icon { font-size: 1.1rem; }
+    .nav-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    /* Panels */
+    .panel { display: none; padding: 1.25rem; }
+    .panel.active { display: block; }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+    }
+
+    .btn-add {
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 0.2s;
+    }
+
+    .btn-add:hover { background: var(--red-dark); }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--tan); }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .card-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge-biltong { background: #fde8d8; color: #8b3a0f; }
+    .badge-beer { background: #fef3d0; color: #7a5c00; }
+    .badge-ginger-beer { background: #e8f5e9; color: #2e7d32; }
+    .badge-cider { background: #e8f4fd; color: #1565c0; }
+    .badge-pickle { background: #f3e8ff; color: #6a1b9a; }
+    .badge-citrus { background: #fff8e1; color: #e65100; }
+    .badge-other { background: #f5f5f5; color: #555; }
+
+    .badge-active { background: #e8f5e9; color: #2e7d32; }
+    .badge-done { background: #f5f5f5; color: #777; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--cream);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 1.5rem 1.25rem 2rem;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 1.25rem;
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      background: white;
+      color: var(--ink);
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--red);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 0.75rem;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--bark); color: var(--bark); }
+
+    .btn-danger {
+      flex: 1;
+      padding: 0.75rem;
+      background: none;
+      border: 1.5px solid #e74c3c;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--red);
+      cursor: pointer;
+    }
+
+    .modal-actions .btn-primary { flex: 2; width: auto; margin-top: 0; }
+
+    /* Detail view */
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0.1rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .detail-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .detail-section {
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .detail-section-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .detail-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+
+    .detail-field:last-child { border-bottom: none; }
+
+    .detail-field-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .detail-field-value {
+      font-size: 0.85rem;
+      color: var(--ink);
+      text-align: right;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .notes-text {
+      font-size: 0.85rem;
+      color: var(--ink);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Ingredients list */
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .ingredient-item:last-child { border-bottom: none; }
+
+    .ingredient-bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+
+    /* Steps */
+    .step-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .step-item:last-child { border-bottom: none; }
+
+    .step-num {
+      background: var(--red);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Add ingredient/step row */
+    .add-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .add-row input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      background: white;
+    }
+
+    .add-row input:focus { outline: none; border-color: var(--red); }
+
+    .btn-small {
+      padding: 0.5rem 0.75rem;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .btn-remove:hover { color: var(--red); }
+
+    /* Tasting notes */
+    .tasting-note-card {
+      background: var(--warm);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-left: 3px solid var(--red);
+    }
+
+    .tasting-note-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .tasting-note-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .rating-stars {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Dashboard */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .dash-stat {
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .dash-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--red);
+      line-height: 1;
+    }
+
+    .dash-stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    .recent-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--charcoal);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      z-index: 999;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── AUTH SCREEN ─── -->
+<div id="auth-screen">
+  <div class="auth-logo">
+    <div class="wordmark">Red Harvest</div>
+    <div class="tagline">Craft · Ferment · Record</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+    <div class="auth-form">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@email.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" />
+      </div>
+      <div id="auth-confirm-field" class="field" style="display:none">
+        <label>Confirm Password</label>
+        <input type="password" id="auth-confirm" placeholder="••••••••" />
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="app">
+  <header class="app-header">
+    <div class="header-brand">
+      Red Harvest
+      <span>Craft Tracker</span>
+    </div>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </header>
+
+  <nav class="app-nav">
+    <button class="nav-tab active" onclick="showPanel('dashboard')" id="tab-dashboard">
+      <span class="nav-icon">🏠</span> Home
+    </button>
+    <button class="nav-tab" onclick="showPanel('batches')" id="tab-batches">
+      <span class="nav-icon">📦</span> Batches
+    </button>
+    <button class="nav-tab" onclick="showPanel('recipes')" id="tab-recipes">
+      <span class="nav-icon">📖</span> Recipes
+    </button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="section-header" style="margin-top:0.5rem">
+      <div class="section-title">Overview</div>
+    </div>
+    <div class="dash-grid" id="dash-stats">
+      <div class="dash-stat"><div class="dash-stat-num" id="stat-batches">–</div><div class="dash-stat-label">Batches</div></div>
+      <div class="dash-stat"><div class="dash-stat-num" id="stat-active">–</div><div class="dash-stat-label">Active</div></div>
+      <div class="dash-stat"><div class="dash-stat-num" id="stat-recipes">–</div><div class="dash-stat-label">Recipes</div></div>
+      <div class="dash-stat"><div class="dash-stat-num" id="stat-types">–</div><div class="dash-stat-label">Craft Types</div></div>
+    </div>
+    <div class="recent-label">Recent Batches</div>
+    <div id="dash-recent"></div>
+  </div>
+
+  <!-- BATCHES -->
+  <div class="panel" id="panel-batches">
+    <div id="batches-list-view">
+      <div class="section-header">
+        <div class="section-title">Batches</div>
+        <button class="btn-add" onclick="openBatchModal()">+ New</button>
+      </div>
+      <div id="batch-filter" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+      <div id="batches-list"></div>
+    </div>
+    <div id="batch-detail-view" style="display:none"></div>
+  </div>
+
+  <!-- RECIPES -->
+  <div class="panel" id="panel-recipes">
+    <div id="recipes-list-view">
+      <div class="section-header">
+        <div class="section-title">Recipes</div>
+        <button class="btn-add" onclick="openRecipeModal()">+ New</button>
+      </div>
+      <div id="recipes-list"></div>
+    </div>
+    <div id="recipe-detail-view" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ─── BATCH MODAL ─── -->
+<div class="modal-overlay" id="batch-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="batch-modal-title">New Batch</div>
+    <div class="form-group">
+      <label>Craft Type</label>
+      <select id="b-type" onchange="updateBatchFields()">
+        <option value="biltong">🥩 Biltong</option>
+        <option value="beer">🍺 Beer</option>
+        <option value="ginger-beer">🫚 Ginger Beer</option>
+        <option value="cider">🍎 Cider</option>
+        <option value="pickle">🫙 Pickle</option>
+        <option value="citrus">🍋 Dried Citrus</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Batch Name</label>
+      <input type="text" id="b-name" placeholder="e.g. Summer Pale Ale #3" />
+    </div>
+    <div class="form-group">
+      <label>Recipe (optional)</label>
+      <select id="b-recipe">
+        <option value="">— No recipe linked —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Start Date</label>
+      <input type="date" id="b-date" />
+    </div>
+    <div id="b-extra-fields"></div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="b-status">
+        <option value="active">🟢 Active</option>
+        <option value="done">✅ Done</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="b-notes" placeholder="Any observations, adjustments, or things to remember..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeBatchModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveBatch()">Save Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── RECIPE MODAL ─── -->
+<div class="modal-overlay" id="recipe-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="recipe-modal-title">New Recipe</div>
+    <div class="form-group">
+      <label>Craft Type</label>
+      <select id="r-type">
+        <option value="biltong">🥩 Biltong</option>
+        <option value="beer">🍺 Beer</option>
+        <option value="ginger-beer">🫚 Ginger Beer</option>
+        <option value="cider">🍎 Cider</option>
+        <option value="pickle">🫙 Pickle</option>
+        <option value="citrus">🍋 Dried Citrus</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Recipe Name</label>
+      <input type="text" id="r-name" placeholder="e.g. Classic Pale Ale" />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="r-desc" placeholder="What makes this recipe special..." style="min-height:60px"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Ingredients</label>
+      <div id="r-ingredients-list"></div>
+      <div class="add-row">
+        <input type="text" id="r-ingredient-input" placeholder="e.g. 500g beef silverside" onkeydown="if(event.key==='Enter'){addIngredient();}" />
+        <button class="btn-small" onclick="addIngredient()">Add</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Steps</label>
+      <div id="r-steps-list"></div>
+      <div class="add-row">
+        <input type="text" id="r-step-input" placeholder="e.g. Slice meat into strips" onkeydown="if(event.key==='Enter'){addStep();}" />
+        <button class="btn-small" onclick="addStep()">Add</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="r-notes" placeholder="Tips, variations, things to try..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeRecipeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveRecipe()">Save Recipe</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TASTING NOTE MODAL ─── -->
+<div class="modal-overlay" id="tasting-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Tasting Note</div>
+    <div class="form-group">
+      <label>Rating</label>
+      <select id="t-rating">
+        <option value="5">⭐⭐⭐⭐⭐ Exceptional</option>
+        <option value="4">⭐⭐⭐⭐ Great</option>
+        <option value="3" selected>⭐⭐⭐ Good</option>
+        <option value="2">⭐⭐ Needs work</option>
+        <option value="1">⭐ Not great</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="t-note" placeholder="How does it taste? Texture, aroma, what would you change?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTastingModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveTastingNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  // ── PASTE YOUR FIREBASE CONFIG HERE ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8TPSxHsDBjXblPCOqoA0T6C0TU90FkSc",
+    authDomain: "reno-tracker-aa090.firebaseapp.com",
+    projectId: "reno-tracker-aa090",
+    storageBucket: "reno-tracker-aa090.firebasestorage.app",
+    messagingSenderId: "572020231472",
+    appId: "1:572020231472:web:2d3fa5fa235cd6df2f0cf5",
+    measurementId: "G-4SJCZ01SDE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ── STATE ──
+  let currentUser = null;
+  let recipes = [];
+  let batches = [];
+  let editingBatchId = null;
+  let editingRecipeId = null;
+  let currentBatchId = null;
+  let currentRecipeId = null;
+  let tempIngredients = [];
+  let tempSteps = [];
+  let activeFilter = 'all';
+
+  // ── AUTH ──
+  window.switchAuthTab = (tab) => {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && tab==='login')||(i===1 && tab==='register')));
+    document.getElementById('auth-confirm-field').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('auth-btn').textContent = tab === 'login' ? 'Sign In' : 'Create Account';
+    document.getElementById('auth-error').textContent = '';
+  };
+
+  window.handleAuth = async () => {
+    const email = document.getElementById('auth-email').value.trim();
+    const pw = document.getElementById('auth-password').value;
+    const isRegister = document.getElementById('auth-btn').textContent === 'Create Account';
+    const errEl = document.getElementById('auth-error');
+    const btn = document.getElementById('auth-btn');
+    errEl.textContent = '';
+    btn.disabled = true;
+    try {
+      if (isRegister) {
+        const confirm = document.getElementById('auth-confirm').value;
+        if (pw !== confirm) { errEl.textContent = 'Passwords do not match.'; btn.disabled = false; return; }
+        await createUserWithEmailAndPassword(auth, email, pw);
+      } else {
+        await signInWithEmailAndPassword(auth, email, pw);
+      }
+    } catch (e) {
+      const msgs = { 'auth/user-not-found': 'No account with that email.', 'auth/wrong-password': 'Incorrect password.', 'auth/email-already-in-use': 'Email already registered.', 'auth/weak-password': 'Password must be at least 6 characters.', 'auth/invalid-email': 'Invalid email address.', 'auth/invalid-credential': 'Invalid email or password.' };
+      errEl.textContent = msgs[e.code] || e.message;
+    }
+    btn.disabled = false;
+  };
+
+  window.signOut = () => fbSignOut(auth);
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    document.getElementById('auth-screen').style.display = user ? 'none' : 'flex';
+    document.getElementById('app').style.display = user ? 'block' : 'none';
+    if (user) { await loadAll(); }
+  });
+
+  // ── DATA LOAD ──
+  async function loadAll() {
+    await Promise.all([loadRecipes(), loadBatches()]);
+    renderDashboard();
+  }
+
+  async function loadRecipes() {
+    const snap = await getDocs(query(collection(db, 'recipes'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc')));
+    recipes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderRecipes();
+    populateRecipeSelect();
+  }
+
+  async function loadBatches() {
+    const snap = await getDocs(query(collection(db, 'batches'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc')));
+    batches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBatches();
+  }
+
+  // ── HELPERS ──
+  const craftLabel = { biltong: '🥩 Biltong', beer: '🍺 Beer', 'ginger-beer': '🫚 Ginger Beer', cider: '🍎 Cider', pickle: '🫙 Pickle', citrus: '🍋 Dried Citrus', other: '📦 Other' };
+  const craftBadge = { biltong: 'badge-biltong', beer: 'badge-beer', 'ginger-beer': 'badge-ginger-beer', cider: 'badge-cider', pickle: 'badge-pickle', citrus: 'badge-citrus', other: 'badge-other' };
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function stars(n) { return '⭐'.repeat(parseInt(n)); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── NAV ──
+  window.showPanel = (name) => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    // Reset detail views
+    if (name === 'batches') { showBatchList(); }
+    if (name === 'recipes') { showRecipeList(); }
+  };
+
+  // ── DASHBOARD ──
+  function renderDashboard() {
+    const active = batches.filter(b => b.status === 'active').length;
+    const types = new Set(batches.map(b => b.type)).size;
+    document.getElementById('stat-batches').textContent = batches.length;
+    document.getElementById('stat-active').textContent = active;
+    document.getElementById('stat-recipes').textContent = recipes.length;
+    document.getElementById('stat-types').textContent = types;
+    const recent = batches.slice(0, 4);
+    document.getElementById('dash-recent').innerHTML = recent.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">🥩</div><p>No batches yet.<br>Start your first craft!</p></div>'
+      : recent.map(b => `
+        <div class="card" onclick="openBatchDetail('${b.id}');showPanel('batches')">
+          <div class="card-title">${b.name}</div>
+          <div class="card-meta">
+            <span class="badge ${craftBadge[b.type]}">${craftLabel[b.type]}</span>
+            <span class="badge ${b.status === 'active' ? 'badge-active' : 'badge-done'}">${b.status}</span>
+            <span>${fmtDate(b.startDate)}</span>
+          </div>
+        </div>`).join('');
+  }
+
+  // ── BATCHES ──
+  function renderBatches() {
+    const list = document.getElementById('batches-list');
+    const filtered = activeFilter === 'all' ? batches : batches.filter(b => b.type === activeFilter);
+    
+    // Filter chips
+    const types = [...new Set(batches.map(b => b.type))];
+    document.getElementById('batch-filter').innerHTML = ['all', ...types].map(t => `
+      <button onclick="setFilter('${t}')" style="padding:0.3rem 0.75rem;border-radius:20px;border:1.5px solid ${activeFilter===t?'var(--red)':'var(--border)'};background:${activeFilter===t?'var(--red)':'white'};color:${activeFilter===t?'white':'var(--muted)'};font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif">
+        ${t === 'all' ? 'All' : craftLabel[t]}
+      </button>`).join('');
+
+    list.innerHTML = filtered.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">📦</div><p>No batches yet.<br>Hit + New to log your first batch.</p></div>'
+      : filtered.map(b => `
+        <div class="card" onclick="openBatchDetail('${b.id}')">
+          <div class="card-title">${b.name}</div>
+          <div class="card-meta">
+            <span class="badge ${craftBadge[b.type]}">${craftLabel[b.type]}</span>
+            <span class="badge ${b.status === 'active' ? 'badge-active' : 'badge-done'}">${b.status}</span>
+            <span>${fmtDate(b.startDate)}</span>
+          </div>
+        </div>`).join('');
+  }
+
+  window.setFilter = (t) => { activeFilter = t; renderBatches(); };
+
+  window.openBatchDetail = (id) => {
+    currentBatchId = id;
+    const b = batches.find(x => x.id === id);
+    if (!b) return;
+    const recipe = b.recipeId ? recipes.find(r => r.id === b.recipeId) : null;
+
+    // Build craft-specific fields
+    let extraFields = '';
+    if (b.type === 'biltong') {
+      if (b.temp) extraFields += `<div class="detail-field"><span class="detail-field-label">Temperature</span><span class="detail-field-value">${b.temp}°C</span></div>`;
+      if (b.hangDays) extraFields += `<div class="detail-field"><span class="detail-field-label">Hang Time</span><span class="detail-field-value">${b.hangDays} days</span></div>`;
+      if (b.weight) extraFields += `<div class="detail-field"><span class="detail-field-label">Starting Weight</span><span class="detail-field-value">${b.weight}g</span></div>`;
+    } else if (['beer','ginger-beer','cider'].includes(b.type)) {
+      if (b.og) extraFields += `<div class="detail-field"><span class="detail-field-label">Original Gravity</span><span class="detail-field-value">${b.og}</span></div>`;
+      if (b.fg) extraFields += `<div class="detail-field"><span class="detail-field-label">Final Gravity</span><span class="detail-field-value">${b.fg}</span></div>`;
+      if (b.og && b.fg) {
+        const abv = ((parseFloat(b.og) - parseFloat(b.fg)) * 131.25).toFixed(1);
+        extraFields += `<div class="detail-field"><span class="detail-field-label">Est. ABV</span><span class="detail-field-value">${abv}%</span></div>`;
+      }
+      if (b.volume) extraFields += `<div class="detail-field"><span class="detail-field-label">Volume</span><span class="detail-field-value">${b.volume}L</span></div>`;
+      if (b.fermDays) extraFields += `<div class="detail-field"><span class="detail-field-label">Ferment Time</span><span class="detail-field-value">${b.fermDays} days</span></div>`;
+    } else if (b.type === 'pickle') {
+      if (b.brine) extraFields += `<div class="detail-field"><span class="detail-field-label">Brine</span><span class="detail-field-value">${b.brine}</span></div>`;
+      if (b.fermDays) extraFields += `<div class="detail-field"><span class="detail-field-label">Ferment Time</span><span class="detail-field-value">${b.fermDays} days</span></div>`;
+    }
+
+    const tastingNotes = (b.tastingNotes || []).slice().reverse();
+
+    document.getElementById('batch-detail-view').innerHTML = `
+      <div class="detail-header">
+        <button class="btn-back" onclick="showBatchList()">←</button>
+        <div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:0.3rem">
+            <span class="badge ${craftBadge[b.type]}">${craftLabel[b.type]}</span>
+            <span class="badge ${b.status==='active'?'badge-active':'badge-done'}">${b.status}</span>
+          </div>
+          <div class="detail-title">${b.name}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Details</div>
+        <div class="detail-field"><span class="detail-field-label">Start Date</span><span class="detail-field-value">${fmtDate(b.startDate)}</span></div>
+        ${recipe ? `<div class="detail-field"><span class="detail-field-label">Recipe</span><span class="detail-field-value">${recipe.name}</span></div>` : ''}
+        ${extraFields}
+      </div>
+
+      ${b.notes ? `<div class="detail-section"><div class="detail-section-title">Notes</div><div class="notes-text">${b.notes}</div></div>` : ''}
+
+      <div class="detail-section">
+        <div class="detail-section-title">Tasting Notes</div>
+        ${tastingNotes.length === 0 ? '<p style="font-size:0.8rem;color:var(--muted)">No tasting notes yet.</p>' : tastingNotes.map(t => `
+          <div class="tasting-note-card">
+            <div class="tasting-note-date">${fmtDate(t.date)}</div>
+            <div class="rating-stars">${stars(t.rating)}</div>
+            <div class="tasting-note-text">${t.note}</div>
+          </div>`).join('')}
+        <button class="btn-add" style="margin-top:0.75rem;width:100%;justify-content:center" onclick="openTastingModal()">+ Add Tasting Note</button>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
+        <button class="btn-secondary" style="flex:1" onclick="editBatch('${b.id}')">Edit</button>
+        <button class="btn-danger" style="flex:1" onclick="deleteBatch('${b.id}')">Delete</button>
+      </div>
+    `;
+
+    document.getElementById('batches-list-view').style.display = 'none';
+    document.getElementById('batch-detail-view').style.display = 'block';
+  };
+
+  function showBatchList() {
+    document.getElementById('batches-list-view').style.display = 'block';
+    document.getElementById('batch-detail-view').style.display = 'none';
+    currentBatchId = null;
+  }
+
+  window.showBatchList = showBatchList;
+
+  // ── BATCH MODAL ──
+  window.openBatchModal = () => {
+    editingBatchId = null;
+    document.getElementById('batch-modal-title').textContent = 'New Batch';
+    document.getElementById('b-name').value = '';
+    document.getElementById('b-type').value = 'biltong';
+    document.getElementById('b-status').value = 'active';
+    document.getElementById('b-notes').value = '';
+    document.getElementById('b-date').value = new Date().toISOString().split('T')[0];
+    updateBatchFields();
+    document.getElementById('batch-modal').classList.add('open');
+  };
+
+  window.closeBatchModal = () => document.getElementById('batch-modal').classList.remove('open');
+
+  window.updateBatchFields = () => {
+    const type = document.getElementById('b-type').value;
+    let html = '';
+    if (type === 'biltong') {
+      html = `
+        <div class="form-row">
+          <div class="form-group"><label>Temp (°C)</label><input type="number" id="b-temp" placeholder="25" /></div>
+          <div class="form-group"><label>Hang Days</label><input type="number" id="b-hangdays" placeholder="5" /></div>
+        </div>
+        <div class="form-group"><label>Starting Weight (g)</label><input type="number" id="b-weight" placeholder="1000" /></div>`;
+    } else if (['beer','ginger-beer','cider'].includes(type)) {
+      html = `
+        <div class="form-row">
+          <div class="form-group"><label>Original Gravity</label><input type="number" step="0.001" id="b-og" placeholder="1.050" /></div>
+          <div class="form-group"><label>Final Gravity</label><input type="number" step="0.001" id="b-fg" placeholder="1.010" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Volume (L)</label><input type="number" id="b-volume" placeholder="20" /></div>
+          <div class="form-group"><label>Ferment Days</label><input type="number" id="b-fermdays" placeholder="14" /></div>
+        </div>`;
+    } else if (type === 'pickle') {
+      html = `
+        <div class="form-group"><label>Brine / Method</label><input type="text" id="b-brine" placeholder="e.g. 5% salt brine" /></div>
+        <div class="form-group"><label>Ferment Days</label><input type="number" id="b-fermdays" placeholder="7" /></div>`;
+    }
+    document.getElementById('b-extra-fields').innerHTML = html;
+  };
+
+  function populateRecipeSelect() {
+    const sel = document.getElementById('b-recipe');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— No recipe linked —</option>' + recipes.map(r => `<option value="${r.id}">${craftLabel[r.type]} — ${r.name}</option>`).join('');
+  }
+
+  window.saveBatch = async () => {
+    const name = document.getElementById('b-name').value.trim();
+    if (!name) { showToast('Please enter a batch name'); return; }
+    const type = document.getElementById('b-type').value;
+    const data = {
+      uid: currentUser.uid,
+      name,
+      type,
+      recipeId: document.getElementById('b-recipe').value || null,
+      startDate: document.getElementById('b-date').value || null,
+      status: document.getElementById('b-status').value,
+      notes: document.getElementById('b-notes').value.trim(),
+    };
+    // Extra fields
+    if (type === 'biltong') {
+      data.temp = document.getElementById('b-temp')?.value || null;
+      data.hangDays = document.getElementById('b-hangdays')?.value || null;
+      data.weight = document.getElementById('b-weight')?.value || null;
+    } else if (['beer','ginger-beer','cider'].includes(type)) {
+      data.og = document.getElementById('b-og')?.value || null;
+      data.fg = document.getElementById('b-fg')?.value || null;
+      data.volume = document.getElementById('b-volume')?.value || null;
+      data.fermDays = document.getElementById('b-fermdays')?.value || null;
+    } else if (type === 'pickle') {
+      data.brine = document.getElementById('b-brine')?.value || null;
+      data.fermDays = document.getElementById('b-fermdays')?.value || null;
+    }
+
+    if (editingBatchId) {
+      await updateDoc(doc(db, 'batches', editingBatchId), data);
+      showToast('Batch updated!');
+    } else {
+      data.createdAt = serverTimestamp();
+      data.tastingNotes = [];
+      await addDoc(collection(db, 'batches'), data);
+      showToast('Batch saved!');
+    }
+    closeBatchModal();
+    await loadBatches();
+    renderDashboard();
+  };
+
+  window.editBatch = (id) => {
+    const b = batches.find(x => x.id === id);
+    if (!b) return;
+    editingBatchId = id;
+    document.getElementById('batch-modal-title').textContent = 'Edit Batch';
+    document.getElementById('b-type').value = b.type;
+    document.getElementById('b-name').value = b.name;
+    document.getElementById('b-recipe').value = b.recipeId || '';
+    document.getElementById('b-date').value = b.startDate || '';
+    document.getElementById('b-status').value = b.status;
+    document.getElementById('b-notes').value = b.notes || '';
+    updateBatchFields();
+    setTimeout(() => {
+      if (b.type === 'biltong') {
+        if (b.temp) document.getElementById('b-temp').value = b.temp;
+        if (b.hangDays) document.getElementById('b-hangdays').value = b.hangDays;
+        if (b.weight) document.getElementById('b-weight').value = b.weight;
+      } else if (['beer','ginger-beer','cider'].includes(b.type)) {
+        if (b.og) document.getElementById('b-og').value = b.og;
+        if (b.fg) document.getElementById('b-fg').value = b.fg;
+        if (b.volume) document.getElementById('b-volume').value = b.volume;
+        if (b.fermDays) document.getElementById('b-fermdays').value = b.fermDays;
+      } else if (b.type === 'pickle') {
+        if (b.brine) document.getElementById('b-brine').value = b.brine;
+        if (b.fermDays) document.getElementById('b-fermdays').value = b.fermDays;
+      }
+    }, 50);
+    document.getElementById('batch-modal').classList.add('open');
+  };
+
+  window.deleteBatch = async (id) => {
+    if (!confirm('Delete this batch? This cannot be undone.')) return;
+    await deleteDoc(doc(db, 'batches', id));
+    showToast('Batch deleted');
+    showBatchList();
+    await loadBatches();
+    renderDashboard();
+  };
+
+  // ── TASTING NOTES ──
+  window.openTastingModal = () => document.getElementById('tasting-modal').classList.add('open');
+  window.closeTastingModal = () => document.getElementById('tasting-modal').classList.remove('open');
+
+  window.saveTastingNote = async () => {
+    const note = document.getElementById('t-note').value.trim();
+    if (!note) { showToast('Please add a note'); return; }
+    const rating = document.getElementById('t-rating').value;
+    const b = batches.find(x => x.id === currentBatchId);
+    if (!b) return;
+    const existing = b.tastingNotes || [];
+    existing.push({ note, rating, date: new Date().toISOString() });
+    await updateDoc(doc(db, 'batches', currentBatchId), { tastingNotes: existing });
+    showToast('Tasting note saved!');
+    closeTastingModal();
+    document.getElementById('t-note').value = '';
+    await loadBatches();
+    openBatchDetail(currentBatchId);
+  };
+
+  // ── RECIPES ──
+  function renderRecipes() {
+    document.getElementById('recipes-list').innerHTML = recipes.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">📖</div><p>No recipes yet.<br>Add your first recipe to get started.</p></div>'
+      : recipes.map(r => `
+        <div class="card" onclick="openRecipeDetail('${r.id}')">
+          <div class="card-title">${r.name}</div>
+          <div class="card-meta">
+            <span class="badge ${craftBadge[r.type]}">${craftLabel[r.type]}</span>
+            ${r.description ? `<span style="color:var(--muted)">${r.description.slice(0,60)}${r.description.length>60?'…':''}</span>` : ''}
+          </div>
+        </div>`).join('');
+  }
+
+  window.openRecipeDetail = (id) => {
+    currentRecipeId = id;
+    const r = recipes.find(x => x.id === id);
+    if (!r) return;
+    const linkedBatches = batches.filter(b => b.recipeId === id);
+
+    document.getElementById('recipe-detail-view').innerHTML = `
+      <div class="detail-header">
+        <button class="btn-back" onclick="showRecipeList()">←</button>
+        <div>
+          <span class="badge ${craftBadge[r.type]}" style="margin-bottom:0.3rem;display:inline-block">${craftLabel[r.type]}</span>
+          <div class="detail-title">${r.name}</div>
+        </div>
+      </div>
+
+      ${r.description ? `<div class="detail-section"><div class="detail-section-title">About</div><div class="notes-text">${r.description}</div></div>` : ''}
+
+      ${r.ingredients?.length ? `
+        <div class="detail-section">
+          <div class="detail-section-title">Ingredients</div>
+          ${r.ingredients.map(i => `<div class="ingredient-item"><div class="ingredient-bullet"></div>${i}</div>`).join('')}
+        </div>` : ''}
+
+      ${r.steps?.length ? `
+        <div class="detail-section">
+          <div class="detail-section-title">Method</div>
+          ${r.steps.map((s,i) => `<div class="step-item"><div class="step-num">${i+1}</div>${s}</div>`).join('')}
+        </div>` : ''}
+
+      ${r.notes ? `<div class="detail-section"><div class="detail-section-title">Notes & Tips</div><div class="notes-text">${r.notes}</div></div>` : ''}
+
+      ${linkedBatches.length ? `
+        <div class="detail-section">
+          <div class="detail-section-title">Batches using this recipe</div>
+          ${linkedBatches.map(b => `<div class="detail-field"><span class="detail-field-label">${b.name}</span><span class="badge ${b.status==='active'?'badge-active':'badge-done'}">${b.status}</span></div>`).join('')}
+        </div>` : ''}
+
+      <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
+        <button class="btn-secondary" style="flex:1" onclick="editRecipe('${r.id}')">Edit</button>
+        <button class="btn-danger" style="flex:1" onclick="deleteRecipe('${r.id}')">Delete</button>
+      </div>
+    `;
+
+    document.getElementById('recipes-list-view').style.display = 'none';
+    document.getElementById('recipe-detail-view').style.display = 'block';
+  };
+
+  function showRecipeList() {
+    document.getElementById('recipes-list-view').style.display = 'block';
+    document.getElementById('recipe-detail-view').style.display = 'none';
+    currentRecipeId = null;
+  }
+
+  window.showRecipeList = showRecipeList;
+
+  // ── RECIPE MODAL ──
+  window.openRecipeModal = () => {
+    editingRecipeId = null;
+    tempIngredients = [];
+    tempSteps = [];
+    document.getElementById('recipe-modal-title').textContent = 'New Recipe';
+    document.getElementById('r-name').value = '';
+    document.getElementById('r-type').value = 'biltong';
+    document.getElementById('r-desc').value = '';
+    document.getElementById('r-notes').value = '';
+    renderIngredients();
+    renderSteps();
+    document.getElementById('recipe-modal').classList.add('open');
+  };
+
+  window.closeRecipeModal = () => document.getElementById('recipe-modal').classList.remove('open');
+
+  window.addIngredient = () => {
+    const val = document.getElementById('r-ingredient-input').value.trim();
+    if (!val) return;
+    tempIngredients.push(val);
+    document.getElementById('r-ingredient-input').value = '';
+    renderIngredients();
+  };
+
+  window.addStep = () => {
+    const val = document.getElementById('r-step-input').value.trim();
+    if (!val) return;
+    tempSteps.push(val);
+    document.getElementById('r-step-input').value = '';
+    renderSteps();
+  };
+
+  window.removeIngredient = (i) => { tempIngredients.splice(i, 1); renderIngredients(); };
+  window.removeStep = (i) => { tempSteps.splice(i, 1); renderSteps(); };
+
+  function renderIngredients() {
+    document.getElementById('r-ingredients-list').innerHTML = tempIngredients.map((ing, i) => `
+      <div class="ingredient-item">
+        <div class="ingredient-bullet"></div>
+        <span style="flex:1">${ing}</span>
+        <button class="btn-remove" onclick="removeIngredient(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  function renderSteps() {
+    document.getElementById('r-steps-list').innerHTML = tempSteps.map((s, i) => `
+      <div class="step-item">
+        <div class="step-num">${i+1}</div>
+        <span style="flex:1">${s}</span>
+        <button class="btn-remove" onclick="removeStep(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  window.saveRecipe = async () => {
+    const name = document.getElementById('r-name').value.trim();
+    if (!name) { showToast('Please enter a recipe name'); return; }
+    const data = {
+      uid: currentUser.uid,
+      name,
+      type: document.getElementById('r-type').value,
+      description: document.getElementById('r-desc').value.trim(),
+      ingredients: tempIngredients,
+      steps: tempSteps,
+      notes: document.getElementById('r-notes').value.trim(),
+    };
+    if (editingRecipeId) {
+      await updateDoc(doc(db, 'recipes', editingRecipeId), data);
+      showToast('Recipe updated!');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'recipes'), data);
+      showToast('Recipe saved!');
+    }
+    closeRecipeModal();
+    await loadRecipes();
+    renderDashboard();
+  };
+
+  window.editRecipe = (id) => {
+    const r = recipes.find(x => x.id === id);
+    if (!r) return;
+    editingRecipeId = id;
+    tempIngredients = [...(r.ingredients || [])];
+    tempSteps = [...(r.steps || [])];
+    document.getElementById('recipe-modal-title').textContent = 'Edit Recipe';
+    document.getElementById('r-name').value = r.name;
+    document.getElementById('r-type').value = r.type;
+    document.getElementById('r-desc').value = r.description || '';
+    document.getElementById('r-notes').value = r.notes || '';
+    renderIngredients();
+    renderSteps();
+    document.getElementById('recipe-modal').classList.add('open');
+  };
+
+  window.deleteRecipe = async (id) => {
+    if (!confirm('Delete this recipe? Batches linked to it will not be deleted.')) return;
+    await deleteDoc(doc(db, 'recipes', id));
+    showToast('Recipe deleted');
+    showRecipeList();
+    await loadRecipes();
+    renderDashboard();
+  };
+
+  // ── CLOSE MODALS ON OVERLAY CLICK ──
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  // Set today's date default
+  document.getElementById('b-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
