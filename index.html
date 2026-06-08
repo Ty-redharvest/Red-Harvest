@@ -990,7 +990,24 @@
   <div class="label-brand">Red Harvest</div>
   <div class="label-name" id="lbl-name"></div>
   <div class="label-date" id="lbl-date"></div>
-  <div class="label-ingredients" id="lbl-ingredients"></div>
+  <div class="label-ingredients" id="lbl-tagline"></div>
+</div>
+
+<!-- Tagline Modal -->
+<div class="modal-overlay" id="tagline-modal">
+  <div class="modal" style="max-height:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Print Label</div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Printing label for <strong id="tagline-label-name"></strong></p>
+    <div class="form-group">
+      <label>Tagline</label>
+      <input type="text" id="tagline-input" placeholder="e.g. Home crafted, Western Australia" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTaglineModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmPrint()">🖨️ Print</button>
+    </div>
+  </div>
 </div>
 
 <!-- Toast -->
@@ -1580,29 +1597,34 @@
   window.printLabel = (source, id) => {
     let name = '';
     let date = '';
-    let ingredients = [];
 
     if (source === 'batch') {
       const b = batches.find(x => x.id === id);
       if (!b) return;
-      const recipe = b.recipeId ? recipes.find(r => r.id === b.recipeId) : null;
       name = b.name;
       date = b.startDate ? new Date(b.startDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      ingredients = recipe?.ingredients || [];
     } else {
       const r = recipes.find(x => x.id === id);
       if (!r) return;
       name = r.name;
       date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      ingredients = r.ingredients || [];
     }
 
+    // Show tagline prompt modal
+    document.getElementById('tagline-label-name').textContent = name;
+    document.getElementById('tagline-input').value = 'Home crafted, Western Australia';
     document.getElementById('lbl-name').textContent = name;
     document.getElementById('lbl-date').textContent = date ? 'Made: ' + date : '';
-    document.getElementById('lbl-ingredients').textContent = ingredients.length
-      ? 'Ingredients: ' + ingredients.join(', ')
-      : '';
+    document.getElementById('tagline-modal').classList.add('open');
+    window._pendingPrintDate = date;
+  };
 
+  window.closeTaglineModal = () => document.getElementById('tagline-modal').classList.remove('open');
+
+  window.confirmPrint = () => {
+    const tagline = document.getElementById('tagline-input').value.trim();
+    document.getElementById('lbl-tagline').textContent = tagline;
+    document.getElementById('tagline-modal').classList.remove('open');
     document.getElementById('label-print-area').style.display = 'block';
     setTimeout(() => {
       window.print();
